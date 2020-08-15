@@ -1,10 +1,21 @@
 let express = require('express');
+let mongodb = require('mongodb');
 
-let app = express()
+let app = express();
+let db
+
+let connectionString = 'mongodb+srv://jetser:<password>@cluster0.rb1sw.mongodb.net/<dbname>?retryWrites=true&w=majority'
+mongodb.connect(connectionString, { useNewUrlParser: true }, { useUnifiedTopology: true }, function (err, client) {
+    db = client.db();
+    app.listen(3000);
+})
 
 app.use(express.urlencoded({ extended: false }))
 
 app.get('/', function (req, res) {
+    db.collection('items').find().toArray(function (err, items) {
+        console.log(items);
+    })
     res.send(`<!DOCTYPE html>
   <html>
   <head>
@@ -57,7 +68,7 @@ app.get('/', function (req, res) {
 })
 
 app.post('/create-item', function (req, res) {
-    console.log(req.body.item);
-    res.send("bien jouer");
+    db.collection('items').insertOne({ text: req.body.item }, function () {
+        res.send("bien jouer");
+    })
 })
-app.listen(3000)
